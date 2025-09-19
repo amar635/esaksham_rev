@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %} Identify Activity{% endblock %}
+{% block content %}
+<div class="d-flex bg-primary py-2 text-white justify-content-center">Activity Identification on Yuktdhara</div>
+<div class="d-flex"></div>
+<div class="d-flex justify-content-between">
+    <div class="card flex-fill m-2 pb-3">
+        <div class="card-body px-2 max-h-150 overflow-scroll">
+            <div class="d-grid gap-2">
+                <div class="fw-bold text-center">Nature of Work</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in gaw %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+                <div class="fw-bold text-center">Master Category</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in categories %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card flex-fill m-2">
+        <div class="card-body px-2 max-h-150 overflow-scroll">
+            <div class="d-grid gap-2">
+                <div class="fw-bold text-center">Select Ridge</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in ridges %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+                <div class="fw-bold text-center">Select Cluster</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in clusters %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>    
+    <div class="card flex-fill m-2">
+        <div class="card-body px-2 max-h-150 overflow-scroll">
+            <div class="d-grid gap-2">
+                <div class="fw-bold text-center">Slope %</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in slopes %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+                <div class="fw-bold text-center">Water Works</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in water_works %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card flex-fill m-2">
+        <div class="card-body px-2 max-h-150 overflow-scroll">
+            <div class="d-grid gap-2">
+                <div class="fw-bold text-center">Beneficiary Type</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in beneficiaries %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+                <div class="fw-bold text-center">Activity Type</div>
+                <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+                    {% for item in activities %}
+                    <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for key, items in assets.items() %}
+    <div class="card flex-fill m-2">
+        <div class="card-header text-center">{{ key }}</div>
+        <div class="card-body px-2 max-h-150 overflow-scroll">
+            <div class="d-grid gap-2">
+                {% for item in items%}
+                <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                <label class="btn btn-outline-dark btn-sm" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="d-flex justify-content-between max-h-350"> 
+    <div class="card flex-fill mx-2">
+        <div class="card-header text-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>{{ "Land Type" }}</span>
+                <span class="perfect-circle bg-dark text-white fs-7 p-1">{{land_types|length}}</span>
+            </div>
+        </div>
+        <div class="card-body overflow-scroll max-h-350">
+            <div class="d-grid gap-2">
+            {% for item in land_types | sort %}
+            <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+            <label class="btn btn-outline-dark btn-sm text-start overflow-x-auto text-nowrap thin-scrollbar" for="btn{{item}}{{loop.index}}">{{ item | capitalize}}</label>
+            {% endfor %}
+            </div>
+        </div>
+    </div>   
+    <div class="card flex-fill mx-2">
+        <div class="card-header text-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>{{ "Major Scheduled Category" }}</span>
+                <span class="perfect-circle bg-dark text-white fs-7 p-1">{{major_scheduled_category|length}}</span>
+            </div>
+        </div>
+        <div class="card-body overflow-scroll max-h-350">
+            <div class="d-grid gap-2">
+            {% for item in major_scheduled_category | sort %}
+            <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+            <label class="btn btn-outline-dark btn-sm text-start overflow-x-auto text-nowrap thin-scrollbar" for="btn{{item}}{{loop.index}}">{{ item }}</label>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="card flex-fill mx-2">
+        <div class="card-header text-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>{{ "Work Type" }}</span>
+                <span class="perfect-circle bg-dark text-white fs-7 p-1 ">{{work_types|length}}</span>
+            </div>
+        </div>
+        <div class="card-body overflow-scroll max-h-350">
+            <div class="d-grid gap-2">
+            {% for item in work_types | sort %}
+            <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+            <label class="btn btn-outline-dark btn-sm text-start overflow-x-auto text-nowrap" for="btn{{item}}{{loop.index}}">{{ item | capitalize}}</label>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="card flex-fill mx-2">
+        <div class="card-header text-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>{{ "Permissible Work"}}</div>
+                <div class="perfect-circle bg-dark text-white fs-7 p-1">{{permissible_works|length}}</div>
+            </div>
+        </div>
+        <div class="card-body overflow-scroll max-h-350">
+            <div class="d-grid gap-2">
+            {% for item in permissible_works | sort %}
+                <input type="checkbox" class="btn-check" id="btn{{item}}{{loop.index}}" autocomplete="off">
+                <label class="btn btn-outline-dark btn-sm text-start overflow-x-auto text-nowrap thin-scrollbar" for="btn{{item}}{{loop.index}}">{{ item | capitalize}}</label>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="card w-25 border border-2 border-primary mx-2">
+        <div class="card-header text-center bg-primary text-white">Yuktdhara Dropdown Selections</div>
+        <div class="card-body">
+            <div class="d-grid gap-2">
+                <div class="form-floating">
+                    <input type="text" name="gaw" id="gaw" class="form-control min-h-20" placeholder="GAW/Non-GAW">
+                    <label for="gaw" class="fs-7 py-1">GAW/Non-GAW</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="master_catgory" id="master_catgory" class="form-control min-h-20" placeholder="Master Category">
+                    <label for="master_catgory" class="fs-7 py-1">Master Category</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="major_scheduled_category" id="major_scheduled_category" class="form-control min-h-20" placeholder="Major Scheduled Category">
+                    <label for="major_scheduled_category" class="fs-7 py-1">Major Scheduled Category</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="beneficiary_type" id="beneficiary_type" class="form-control min-h-20" placeholder="Benficiary Type">
+                    <label for="beneficiary_type" class="fs-7 py-1">Benficiary Type</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="activity_type" id="activity_type" class="form-control min-h-20" placeholder="Activity Type">
+                    <label for="activity_type" class="fs-7 py-1">Activity Type</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="work_type" id="work_type" class="form-control min-h-20" placeholder="Work Type">
+                    <label for="work_type" class="fs-7 py-1">Work Type</label>
+                </div>
+                <div class="form-floating">
+                    <input type="text" name="permissible_work" id="permissible_work" class="form-control min-h-20" placeholder="Permissible Works">
+                    <label for="permissible_work" class="fs-7 py-1">Permissible Works</label>
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %} Launch {% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="p-5 mb-4 bg-dark text-white rounded-3">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">{{course.name}}</h1>
+            <p class="col-md-8 fs-4">{{course.description}}</p> <a class="btn btn-primary btn-lg" href="{{'/launch/%s' % course.id}}" target="_blank">Launch Course</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
