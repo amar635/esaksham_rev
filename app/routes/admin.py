@@ -1,8 +1,10 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from app.classes.forms import RoleForm, menuItemForm
+from app.models.menu_in_role import MenuInRole
 from app.models.menu_item import MenuItem
 from app.models.role import Role
+from app.models.user_in_role import UserInRole
 
 
 blp = Blueprint('admin',__name__,url_prefix='/admin')
@@ -40,3 +42,20 @@ def menu_items():
             flash("Menu item already exists!", "success")
         
     return render_template("admin/menu_items.html", menu_items=all_menu_items, form=form)
+
+@blp.route('/users_in_roles', methods=['GET','POST'])
+def users_in_roles():
+    if request.method=='POST':
+        print('post method')
+        pass
+    roles = Role.get_all()
+    user_in_roles = UserInRole.get_all()
+    for i in range(10):
+        user_in_roles.append({"serial": i + 1,"user_id": i,"username": "username_" + str(i),"roles": ["user"]})
+    return render_template('admin/users_in_roles.html', roles = roles, users=user_in_roles)
+
+@blp.route("/menu_in_roles")
+def menu_in_roles():
+    roles = Role.get_all()
+    menu_in_roles = MenuInRole.get_all()
+    return render_template('admin/menu_in_roles.html', roles = roles, menu_items = menu_in_roles)

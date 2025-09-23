@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %} Home {% endblock %}
 {% block content %}
-<div class="bg-dark">
+<div class="bg-dark mt-150">
     <div class="d-flex justify-content-center">
         <div class="col-md-9">
             <div class="ratio ratio-16x9 mt-5">
@@ -25,8 +25,8 @@
             </div>
         </div>
         <div class="row" style="padding-top: 220px;">
-            <div class="container z-0" style="width: fit-content;">
-                <img src="{{ url_for('static', filename='assets/satellite.png') }}" />
+            <div class="container z-2" style="width: fit-content;">
+                <img class="me-1" src="{{ url_for('static', filename='assets/satellite.png') }}" />
             </div>
         </div>
         <div class="row d-flex justify-content-center mt-2">

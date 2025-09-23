@@ -1,7 +1,16 @@
 /* Custom CSS*/
+.bg-primary{
+    background-color: var(--bs-purple);
+}
 .page-header {
-background-color: white;
-border-radius: 70px;
+    background-color: white;
+    border-radius: 70px;
+    }
+.nav-link:focus-visible{
+    box-shadow: none;
+}
+.mt-150{
+    margin-top:150px;
 }
 .mt-n5 {
         margin-top: -5rem;  /* pull upwards */
@@ -37,6 +46,67 @@ border-radius: 70px;
 .form-floating>.form-control.min-h-20{
     height:20px;
     min-height: 20px;
+}
+ /* Header Styles */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 1.5rem 0; /* 24px - equivalent to py-3 */
+    height: 100px;
+}
+
+.header.shrunk {
+    padding: 0.75rem 0; /* 12px - half of original */
+    height: 50px;
+}
+
+/* Logo and image scaling */
+.header img {
+    max-height: 60px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    object-fit: contain;
+}
+
+.header.shrunk img {
+    max-height: 30px;
+}
+/* e-Saksham Logo */
+.logo {
+      display: flex;
+      align-items: center;
+      font-family: 'Arial', sans-serif;
+    }
+
+.logo-circle {
+    /* background-color: #2a7d76;  teal green circle 
+    color: white;*/
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #313962;
+    color:#33cccc;
+    /* font-size: 28px; */
+    /* font-weight: bold; */
+    /* margin-right: 12px; */
+}
+.logo-circle-30{
+    height:30px; 
+    width:30px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    background-color: #313962;
+    color:#33cccc;
 }
 /* Perfect Circle */
 .perfect-circle {

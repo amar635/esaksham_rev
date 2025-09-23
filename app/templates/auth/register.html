@@ -3,8 +3,8 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card py-5 px-3" style="border-width: 5px;">
-            <div class="card-header">
+        <div class="card border-5">
+            <div class="card-header text-center">
                 <h4 class="card-title mb-0"> Register </h4>
             </div>
             <div class="card-body">
@@ -277,6 +277,20 @@
         sel.appendChild(opt);
         sel.selectedIndex = 0;
         sel.disabled = !!disabled;
+        // if (placeholder == '— Select District —') {
+        //     const opt = document.createElement('option');
+        //     opt.value = '-1';
+        //     opt.textContent = 'State Official';
+        //     // Keep first option as placeholder to satisfy "selectedIndex is not zero" logic
+        //     sel.appendChild(opt);
+        // }
+        // else if (placeholder == '— Select Block —'){
+        //     const opt = document.createElement('option');
+        //     opt.value = '-1';
+        //     opt.textContent = 'District Official';
+        //     // Keep first option as placeholder to satisfy "selectedIndex is not zero" logic
+        //     sel.appendChild(opt);
+        // }
     }
 
     function populateSelect(sel, items, placeholder) {

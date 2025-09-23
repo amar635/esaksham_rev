@@ -1,6 +1,20 @@
 from datetime import datetime, timezone
 from app.db import db
 
+# class Role(db.Model):
+#     __tablename__ = 'roles'
+    
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(50), unique=True, nullable=False, index=True)
+#     description = db.Column(db.Text)
+#     is_active = db.Column(db.Boolean, default=True, nullable=False)
+#     created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+#     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    
+#     # Relationships
+#     role_users = db.relationship('UserInRole', back_populates='role', lazy='dynamic')
+#     role_menus = db.relationship('MenuInRole', back_populates='role', lazy='dynamic')
+
 class Role(db.Model):
     __tablename__ = 'roles'
     
@@ -8,12 +22,11 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False, index=True)
     description = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
-    
+
     # Relationships
-    role_users = db.relationship('UserInRole', back_populates='role', lazy='dynamic')
-    role_menus = db.relationship('MenuInRole', back_populates='role', lazy='dynamic')
+    role_users = db.relationship('UserInRole', back_populates='role', cascade="all, delete-orphan")
+    role_menus = db.relationship('MenuInRole', back_populates='role', cascade="all, delete-orphan")
+
 
     def __init__(self, name, description, is_active=True, created_at=datetime.now(timezone.utc)):
         self.name = name
@@ -32,6 +45,10 @@ class Role(db.Model):
     def get_menus(self):
         """Get all menu items accessible by this role"""
         return [rm.menu for rm in self.role_menus]
+    
+    @classmethod
+    def get_all(cls):
+        return cls.query.all()
     
     def save(self):
         db.session.add(self)

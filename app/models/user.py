@@ -16,6 +16,22 @@ except ImportError:
     access_logger = logging.getLogger('access')
     error_logger = logging.getLogger('error')
 
+# class User(UserMixin, db.Model):
+#     __tablename__ = "users"
+    
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(128))
+#     email = db.Column(db.String(128), unique=True)
+#     password = db.Column(db.String(128))
+#     is_active = db.Column(db.Boolean, default=True)
+#     is_admin = db.Column(db.Boolean, default=False)
+#     registered_on = db.Column(db.DateTime, default=lambda: datetime.now(tz=ZoneInfo('Asia/Kolkata')))
+#     uuid = db.Column(db.String(36), unique=True, index=True, default=lambda: str(uuid.uuid4()))
+
+#     # Relationships
+#     user_roles = db.relationship('UserInRole', back_populates='user', cascade="all, delete-orphan")
+
+
 
 class User(UserMixin, db.Model):
     def get_uuid():
@@ -96,6 +112,67 @@ class User(UserMixin, db.Model):
             error_logger.error(f"Error in json() for User id={getattr(self, 'id', None)}: {ex}")
             return {}
 
+    def get_structured_menus(self):
+        """
+        Return a hierarchical list of active menu items available to this user through roles.
+        Filters for active menus and structures them into a parent-child tree.
+        """
+        from sqlalchemy.orm import joinedload
+        from app.models import MenuItem, MenuInRole, Role, UserInRole
+        # Load all active menu items associated with the user's roles
+        # Use aliased for self-referential joins to avoid ambiguity
+        # MenuItemAlias = aliased(MenuItem)
+
+        all_user_menus_flat = (
+            db.session.query(MenuItem)
+            .join(MenuInRole)
+            .join(Role)
+            .join(UserInRole)
+            .filter(
+                UserInRole.user_id == self.id,
+                MenuItem.is_active == True,
+                Role.is_active == True # Ensure roles themselves are active
+            )
+            .options(joinedload(MenuItem.parent), joinedload(MenuItem.children)) # Eager load parents and children
+            .order_by(MenuItem.order_index)
+            .all()
+        )
+
+        # Build a dictionary for quick lookup by ID
+        menu_dict = {menu.id: menu for menu in all_user_menus_flat}
+
+        # Structure the menus hierarchically
+        # Each menu object might have a `children` list if the relationship is set up correctly
+        # We need to filter for top-level menus (parent_id is None)
+        top_level_menus = []
+        for menu in all_user_menus_flat:
+            if menu.parent_id is None:
+                top_level_menus.append(menu)
+            # Ensure children loaded via `joinedload` are also from `menu_dict` to maintain consistency
+            # if using explicit children management, not relying solely on backref in all_user_menus_flat.
+            # However, with joinedload, SQLAlchemy usually handles this.
+            
+        # Sort top-level menus by order_index
+        top_level_menus.sort(key=lambda m: m.order_index)
+
+        return top_level_menus
+    
+    def get_menus(self):
+        """Return all active menu items available to this user through roles."""
+        from sqlalchemy.orm import joinedload
+        from app.models import MenuItem, MenuInRole, Role, UserInRole
+
+        menus = (
+            MenuItem.query.join(MenuInRole)
+            .join(Role)
+            .join(UserInRole)
+            .filter(UserInRole.user_id == self.id, MenuItem.is_active == True)
+            .options(joinedload(MenuItem.children))  # load children for hierarchy
+            .order_by(MenuItem.order_index)
+            .all()
+        )
+        return menus
+    
     @classmethod
     def get_user_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()

@@ -16,9 +16,10 @@ def districts():
 
     if not state_id:
         return jsonify({"error": "state_id is required"}), 400
-
+    district_list = [{"id": -1, "name": "--STATE OFFICIAL--"}]
     districts = District.query.filter_by(state_id=state_id).all()
-    district_list = [{"id": d.id, "name": d.name} for d in districts]
+    for d in districts:
+        district_list.append({"id": d.id, "name": d.name})
 
     return jsonify(district_list), 200
 
@@ -27,10 +28,15 @@ def blocks():
     district_id = request.args.get("district_id", type=int)
 
     if not district_id:
-        return jsonify({"error": "district_id is required"}), 400
+        return jsonify({"error": "district_id is required"}), 400    
 
-    blocks = Block.query.filter_by(district_id=district_id).all()
-    block_list = [{"id": b.id, "name": b.name} for b in blocks]
+    block_list = [{"id": -1, "name": "-- DISTRICT OFFICIAL --"}]
+    if district_id==-1:
+        block_list = [{"id": -1, "name": "-- STATE OFFICIAL --"}]
+    else:
+        blocks = Block.query.filter_by(district_id=district_id).all()
+        for b in blocks:
+            block_list.append({"id": b.id, "name": b.name})
 
     return jsonify(block_list), 200
 

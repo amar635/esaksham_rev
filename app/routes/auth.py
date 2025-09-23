@@ -58,9 +58,9 @@ def register():
                         email=email,
                         password=pbkdf2_sha256.hash(password), 
                         state_id=state_id, 
-                        district_id=district_id,
-                        block_id=block_id)
-            user.save()
+                        district_id=None if district_id == -1 else district_id,
+                        block_id=None if block_id == -1 else block_id)
+            # user.save()
             flash(message=f"Registered Successfully. Please login with your crendentials", category="success")
             return redirect(url_for('auth.login'))
         except Exception as ex:

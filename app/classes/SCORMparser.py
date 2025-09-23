@@ -16,6 +16,7 @@ class SCORMParser:
         self.title = title
         self.description = description
         self.scorm_version = None
+        self.duplicate_package_path = None
 
     def to_json(self):
         return {
@@ -28,7 +29,8 @@ class SCORMParser:
             "launch_url":self.launch_url,
             "title":self.title,
             "description":self.description,
-            "scorm_version":self.scorm_version
+            "scorm_version":self.scorm_version,
+            "duplicate_package_path":self.duplicate_package_path
         }
 
     def extract_package(self):
@@ -58,8 +60,9 @@ class SCORMParser:
 
         # Get launch URL from <resources>
         resource_elems = root.xpath('//imscp:resources/imscp:resource[@adlcp:scormtype="sco"]', namespaces=nsmap)
-        if resource_elems[0] and 'href' in resource_elems[0].attrib:
-            self.launch_url = resource_elems[0].attrib['href']
+        if resource_elems[0]:
+            if 'href' in resource_elems[0].attrib:
+                self.launch_url = resource_elems[0].attrib['href']
         else:
             self.launch_url = 'index_lms.html'
 
@@ -78,7 +81,7 @@ class SCORMParser:
         
         # if duplicate remove extracted file and return nothing
         if identifier_exist:
-            return None
+            self.duplicate_package_path=identifier_exist.package_path
 
         # Description (optional)
         # desc_elem = root.xpath('//imscp:metadata/imsmd:lom/imsmd:general/imsmd:description/imsmd:langstring', namespaces=nsmap)

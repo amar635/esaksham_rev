@@ -12,6 +12,8 @@ from app.models import State_UT, District, Block, ActivityLog, User
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 
+from app.models.visit_count import VisitCount
+
     
 def create_db(app):
     directory_path = os.path.dirname(__file__).split("/classes")[0]
@@ -296,4 +298,23 @@ def setup_logger(name, log_level=logging.INFO):
     logger.addHandler(console_handler)
     
     return logger
+
+# Function to convert number to a string with seven digits
+def convert_to_seven_digits(number):
+    return f"{number:07d}"
+
+def get_or_create_visit_count():
+    """Reads or initializes the visit count from/to the database."""
+    try:
+        record = VisitCount.query.filter_by(id=1).with_for_update().first() # Use with_for_update for concurrency
+        if not record:
+            record = VisitCount(id=1, count=0)
+            db.session.add(record)
+            db.session.commit()
+            # activity_logger.info("VisitCount record initialized in DB.")
+        return record.count
+    except Exception as ex:
+        db.session.rollback() # Ensure rollback on error
+        # error_logger.error(f"Failed to read/initialize visit count: {ex}")
+        return 0
     
