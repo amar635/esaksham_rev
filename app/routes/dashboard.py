@@ -1,10 +1,116 @@
-from typing import OrderedDict
-from flask import Blueprint, render_template
+from collections import defaultdict
+from datetime import datetime
+from flask import Blueprint, json, jsonify, render_template, request
+
+from app.models.user import User
+from app.models.user_courses import UserCourse
 
 
 blp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
-@blp.route('/dashboard/activity_identification', methods=['GET','POST'])
+@blp.route('/')
+def universal_dashboard():
+    return render_template("dashboard/universal_dashboard.html")
+
+@blp.route('/charts')
+def charts():
+    print('chart_dashboard preparing on:', datetime.now())
+    total_users = User.get_total_users()
+    certified_users = UserCourse.get_certified_users()
+    issuance_percentage = (certified_users / total_users * 100) if total_users > 0 else 0
+    card_data = {
+        'total_users': total_users,
+        'certified_users': certified_users,
+        'issuance_percentage': f"{issuance_percentage:.2f}"
+    }
+    
+    pie_chart_data = {
+        'issued_total': certified_users,
+        'non_issued_total': total_users - certified_users
+    }
+    
+    # Fetch hierarchical data in batches
+    states = UserCourse.get_state_wise_users(top_5=True)
+    districts = UserCourse.get_all_district_wise_users([s['id'] for s in states], top_5=True)
+    blocks = UserCourse.get_all_block_wise_users([d['id'] for d in districts], top_5=True)
+    users = UserCourse.get_all_users_in_blocks([b['id'] for b in blocks])
+
+    district_data = defaultdict(list)
+    for d in districts:
+        district_data[d['state_id']].append(d)
+
+    block_data = defaultdict(list)
+    for b in blocks:
+        block_data[b['district_id']].append(b)
+
+    users_data = defaultdict(list)
+    for u in users:
+        users_data[u['block_id']].append(u)
+
+    bar_chart_data = {
+        'states': states,
+        'districts': dict(district_data),
+        'blocks': dict(block_data),
+        'users': dict(users_data),
+    }
+    
+    # access_logger.info("Dashboard data prepared")
+    print('chart_dashboard completed on:', datetime.now())
+    return render_template('dashboard/charts_dashboard.html',card_data=card_data, 
+                        pie_chart_data=pie_chart_data, bar_chart_data=bar_chart_data)
+
+@blp.route('/data', methods=['post'])
+def data():
+    data = request.json
+    total_users = User.get_total_users(state_id=data['state_id'], district_id=data['district_id'], block_id=data['block_id'])
+    certified_users = UserCourse.get_certified_users(state_id=data['state_id'], district_id=data['district_id'], block_id=data['block_id'])
+    issuance_percentage = (certified_users / total_users * 100) if total_users > 0 else 0
+    card_data = {
+        'total_users': total_users,
+        'certified_users': certified_users,
+        'issuance_percentage': f"{issuance_percentage:.2f}"
+    }
+    
+    pie_chart_data = {
+        'issued_total': certified_users,
+        'non_issued_total': total_users - certified_users
+    }
+    
+    return jsonify({'card_data': card_data, 'pie_chart_data': pie_chart_data}),200
+
+@blp.route('/drill_chart')
+def drill_chart():
+     return render_template('dashboard/drill_chart.html')
+
+@blp.route('/states', methods=['GET','POST'])
+def get_dashboard_states():
+    certificates = []
+    certificates =UserCourse.get_state_count()
+    return jsonify(certificates)
+
+@blp.route('/districts', methods=['POST'])
+def get_dashboard_districts():
+    certificates = []
+    data = json.loads(request.data)
+    try:
+        results =UserCourse.get_district_count(data['state_id'])
+        return jsonify(results), 200
+    except Exception as e:
+            print(f"Error in get_districts: {str(e)}")
+            return jsonify({'error': 'Failed to fetch districts data'}), 500
+
+@blp.route('/blocks', methods=['POST'])
+def get_dashboard_blocks():
+    results = []
+    data = json.loads(request.data)
+    try:
+        results =UserCourse.get_block_count(data['state_id'], data['district_id'])
+        return jsonify(results), 200
+    except Exception as e:
+            print(f"Error in get_blocks: {str(e)}")
+            return jsonify({'error': 'Failed to fetch blocks data'}), 500
+
+@blp.route('/activity_identification', methods=['GET','POST'])
 def activity_identification():
     gaw = ["GAW", "Non GAW"]
     categories = ["A","B","C","D"]

@@ -227,7 +227,7 @@ def get_lrs_query_string(learner, base_url):
         }
 
         # Convert the Python dictionary to a JSON string
-        json_string = json.dumps(correct_payload)
+        json_string = json.dumps(correct_payload, separators=(",", ":"))
 
         # URL-encode the JSON string
         encoded_string = urllib.parse.quote(json_string, safe='')

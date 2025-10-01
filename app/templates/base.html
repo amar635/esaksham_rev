@@ -11,8 +11,9 @@
     <!--Scripts-->
     <script src="{{url_for('static', filename='js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/jsencrypt.min.js')}}"></script>
-
-    <title>e-Saksham - {% block title %}{% endblock %}</title>
+    <script src="{{url_for('static', filename='js/html2pdf.bundle.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/base.js')}}"></script>
+    <title>सक्षम - {% block title %}{% endblock %}</title>
 </head>
 <body>
     <!-- Flash Messages -->
@@ -21,7 +22,7 @@
      {% for category, message in messages %}
     <div id="flash-alert" class="fixed-top w-50 mt-5 mx-auto slide-alert-transition -translate-y-full opacity-0">
          <div class="alert {% if category=='success' %} alert-success {% elif category=='error' %} alert-danger {% else %} alert-warning {% endif %} alert-dismissible fade show" role="alert">
-                <div class="flex align-middle">
+                <div class="d-flex align-middle">
                     {% if category=='success' %} 
                     <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 square-25" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -45,8 +46,8 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    <!--Logos-->
     <header class="header" id="header">
+        <!--Logos-->
         <div class="d-flex justify-content-around pb-2">
             <img src="{{ url_for('static', filename='assets/nregs_mord_logo.png') }}" />
             <img src="{{ url_for('static', filename='assets/esaksham.png') }}" />
@@ -64,8 +65,9 @@
             <div class="container">
                 <a class="navbar-brand" href="#">
                     <div class="logo">
-                        <div class="logo-circle-30" style="background-color: #313962; color:#33cccc;">
-                            <span class="fs-6">ई</span>
+                        <div class="logo-circle-30">
+                            <!-- <span class="fs-6">ई</span> -->
+                             <img src="{{url_for('static',filename='assets/e_ki_matra.png')}}" alt="ई ki matra" height="25px">
                         </div>
                     </div>
                 </a>
@@ -76,7 +78,7 @@
                 <ul class="navbar-nav">
                     {% for menu in nav_menus %}
                     {% if not menu.parent_id %}
-                    {% if not menu.name|lower == 'profile' %}
+                    {% if menu.name|lower not in ['profile', 'login', 'register', 'error'] %}
                         <li class="nav-item {% if menu.children %}dropdown{% endif %}">
                         {% if menu.children %}
                         <a class="nav-link dropdown-toggle" href="{{ menu.url }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -89,7 +91,7 @@
                         {% endif %}
                         {% if menu.children %}
                             <ul class="dropdown-menu">
-                            {% for child in menu.children %}
+                            {% for child in menu.children | sort(attribute='order_index') %}
                                 <li><a class="dropdown-item" href="{{ child.url }}">{{ child.name | capitalize}}</a></li>
                             {% endfor %}
                             </ul>
@@ -102,7 +104,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% for menu in nav_menus %}
                     {% if not menu.parent_id %}
-                    {% if menu.name|lower == 'profile' %}
+                    {% if menu.name|lower in ['profile', 'login', 'error'] %}
                         <li class="nav-item {% if menu.children %}dropdown{% endif %}">
                         {% if menu.children %}
                         <a class="nav-link dropdown-toggle" href="{{ menu.url }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -115,7 +117,7 @@
                         {% endif %}
                         {% if menu.children %}
                             <ul class="dropdown-menu">
-                            {% for child in menu.children %}
+                            {% for child in menu.children|sort(attribute='order_index') %}
                                 <li><a class="dropdown-item" href="{{ child.url }}">{{ child.name | capitalize}}</a></li>
                             {% endfor %}
                             </ul>
@@ -131,9 +133,9 @@
     </header>
    
     <!-- Title / Subtitle Header-->
-    {% if not page_title | lower == 'home'%}
-    <div>
-        <div class="text-center bg-secondary pt-3 pb-5">
+    {% if page_title | lower not in ['home','login', 'error']%}
+    <div class="mt-150">
+        <div class="text-center bg-secondary">
             <div class="text-white fs-2">{{page_title | capitalize}}</div>
             <div class="text-white fs-6">{{page_subtitle | capitalize}}</div>
             <div class="text-white fs-6">&nbsp;</div>             
@@ -141,13 +143,17 @@
         <div class="bg-white mx-auto w-25 text-center text-white py-3 mt-n3 rounded-top-5">
             <nav class="text-center" style="--bs-breadcrumb-divider: '|';" aria-label="breadcrumb">
                 <ol class="breadcrumb justify-content-center">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Library</li>
+                    {% for breadcrumb in breadcrumbs %}
+                    <li class="breadcrumb-item {% if loop.last %} active {% endif %}"><a class="{% if loop.last %} link-secondary link-underline link-underline-opacity-0 link-underline-opacity-75-hover {% endif %}" href="{{breadcrumb.url}}">{{breadcrumb.name | capitalize}}</a></li>
+                    {% endfor %}
                 </ol>
             </nav>
         </div>
         <div class="bg-white mx-auto w-50 text-center text-white py-3 mt-n3 rounded-top-5"></div> 
     </div>
+    {% else %}
+    <!-- Add the top margin -->
+    <div class="mt-150"></div>
     {% endif %}
     {% block content %}{% endblock %} 
     <div class="bg-dark">
@@ -156,39 +162,45 @@
                 <div class="col ms-3"> 
                     <div class="d-flex align-items-center">
                     <a href="{{url_for('routes.index')}}" class="text-decoration-none" aria-label="Bootstrap"> 
-                        <img src="{{ url_for('static', filename='assets/brand_logo.png') }}" height="40"/>
+                        <img src="{{ url_for('static', filename='assets/esaksham.png') }}" height="40"/>
                     </a> 
                     <span class="text-white ms-3">© 2025</span> 
                     </div>
+                    <div class="mt-3 me-2">
+                        <p class="fs-7 text-white fw-lighter">
+                            ई-saksham is a web based digital learning platform for MGNREGS Officials that includes courses on participatory planning using Yuktdhara, GIS basics and the rural employment framework.
+                        </p>
+                    </div>
                 </div> 
-                <div class="col"> 
-                    <h5>Section</h5> 
+                <div class="col ms-3"> 
+                    <h5 class="text-white fw-lighter">Important Links</h5> 
+                    <hr class="me-5">
                     <ul class="nav flex-column"> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Home</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Features</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Pricing</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">FAQs</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">About</a></li> 
+                        <li class="nav-item mb-2"><a href="https://bhuvan-app2.nrsc.gov.in/planner_v3/plannerhome.php" class="nav-link link-secondary p-0" target="_blank">Yuktdhara</a></li> 
+                        <li class="nav-item mb-2"><a href="https://www.youtube.com/@yuktdhara-training/playlists" class="nav-link link-secondary p-0" target="_blank">YouTube Channel</a></li> 
+                        <li class="nav-item mb-2"><a href="https://nrega.dord.gov.in/MGNREGA_new/Nrega_home.aspx" class="nav-link link-secondary p-0" target="_blank">MGNREGA</a></li> 
+                        <li class="nav-item mb-2"><a href="https://rural.gov.in/" class="nav-link link-secondary p-0" target="_blank">MoRD</a></li> 
+                        <li class="nav-item mb-2"><a href="https://bhuvan.nrsc.gov.in/ngmaps?mode=Hybrid#3.87/22.91/82.78" class="nav-link link-secondary p-0" target="_blank">Bhuvan</a></li> 
+                        <li class="nav-item mb-2"><a href="https://igotkarmayogi.gov.in/#/" class="nav-link link-secondary p-0" target="_blank">iGOT</a></li> 
+                    </ul> 
+                </div> 
+                <div class="col ms-3"> 
+                    <h5 class="text-white fw-lighter">Resources</h5> 
+                    <hr class="me-5">
+                    <ul class="nav flex-column"> 
+                        <li class="nav-item mb-2"><a href="/yuktdhara" class="nav-link link-secondary p-0">Yuktdhara Manual</a></li> 
+                        <li class="nav-item mb-2"><a href="/samarthaya" class="nav-link link-secondary p-0">Samarthaya</a></li> 
+                        <li class="nav-item mb-2"><a href="/leaflet" class="nav-link link-secondary p-0">Yuktdhara Leaflet</a></li> 
                     </ul> 
                 </div> 
                 <div class="col"> 
-                    <h5>Section</h5> 
+                    <h5 class="text-white fw-lighter">Other</h5> 
+                    <hr class="me-5">
                     <ul class="nav flex-column"> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Home</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Features</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Pricing</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">FAQs</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">About</a></li> 
-                    </ul> 
-                </div> 
-                <div class="col"> 
-                    <h5>Section</h5> 
-                    <ul class="nav flex-column"> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Home</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Features</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">Pricing</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">FAQs</a></li> 
-                        <li class="nav-item mb-2"><a href="#" class="nav-link p-0">About</a></li> 
+                        <li class="nav-item mb-2"><a href="/faq" class="nav-link link-secondary p-0">FAQs</a></li> 
+                        <li class="nav-item mb-2"><a href="/contact" class="nav-link link-secondary p-0">Contact</a></li> 
+                        <li class="nav-item mb-2"><a href="/dashboard" class="nav-link link-secondary p-0">Dashboard</a></li> 
+                        <li class="nav-item mb-2"><a href="/reels" class="nav-link link-secondary p-0">Reels & Videos</a></li> 
                     </ul> 
                 </div> 
             </div>
@@ -293,6 +305,7 @@
         //         }
         //     });
         // });
+        
     </script>
 </body>
 </html>

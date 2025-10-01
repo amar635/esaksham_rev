@@ -112,6 +112,7 @@ class User(UserMixin, db.Model):
             error_logger.error(f"Error in json() for User id={getattr(self, 'id', None)}: {ex}")
             return {}
 
+    # Menu related functions
     def get_structured_menus(self):
         """
         Return a hierarchical list of active menu items available to this user through roles.
@@ -173,6 +174,40 @@ class User(UserMixin, db.Model):
         )
         return menus
     
+    def get_anonymous_menu():
+        from sqlalchemy.orm import joinedload
+        from app.models import MenuItem, MenuInRole, Role, UserInRole
+
+        menus = (
+            MenuItem.query.join(MenuInRole)
+            .filter(MenuInRole.role_id == 4, MenuItem.is_active == True) # anoymous users = 4
+            .options(joinedload(MenuItem.children))  # load children for hierarchy
+            .order_by(MenuItem.order_index)
+            .all()
+        )
+        return menus
+    
+    # Charts Dashboard methods
+    @classmethod
+    def get_total_users(cls,state_id=None, district_id=None, block_id=None):
+        try:
+            access_logger.info(f"Fetching total user count with filters: state_id={state_id}, district_id={district_id}, block_id={block_id}")
+            query = cls.query
+            
+            if state_id:
+                query = query.filter_by(state_id=state_id)
+            if district_id:
+                query = query.filter_by(district_id=district_id)
+            if block_id:
+                query = query.filter_by(block_id=block_id)
+            
+            total = query.count()
+            activity_logger.info(f"Total users counted with filters: {total}")
+            return total
+        except Exception as ex:
+            error_logger.error(f"Error fetching filtered user count: {ex}")
+            return 0
+
     @classmethod
     def get_user_by_id(cls, _id):
         return cls.query.filter_by(id=_id).first()

@@ -26,8 +26,7 @@ def scorm_initialize(course_id):
         
         return jsonify({'result': 'true', 'errorCode': '0'})
     except Exception as e:
-        return jsonify({'result': 'false', 'errorCode': '101'})
-    
+        return jsonify({'result': 'false', 'errorCode': '101'}) 
 
 # flask backend:
 @blp.route('/scorm/<int:course_id>/get_value', methods=['POST'])
@@ -49,7 +48,6 @@ def scorm_get_value(course_id):
     except Exception as e:
         print("Error in scorm_get_value:", str(e))
         return jsonify({'result': '', 'errorCode': '101'})
-
 
 @blp.route('/scorm/<int:course_id>/set_value', methods=['POST'])
 def scorm_set_value(course_id):

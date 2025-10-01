@@ -14,3 +14,5 @@ from app.models.role import Role
 from app.models.menu_item import MenuItem
 from app.models.user_in_role import UserInRole
 from app.models.menu_in_role import MenuInRole
+from app.models.feedback import Feedback
+from app.models.visit_count import VisitCount
