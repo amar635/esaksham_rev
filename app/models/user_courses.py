@@ -17,9 +17,9 @@ from app.models.courses import Course
 class UserCourse(db.Model):
     __tablename__ = 'user_courses'
     
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    # id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False, primary_key=True)
     certificate_issued = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
     
@@ -83,6 +83,16 @@ class UserCourse(db.Model):
             # error_logger.error(f"Error committing CourseStatus for user_id={self.user_id}, course={self.course_id}: {ex}")
             raise ex
     
+    def update(user_id, course_id):
+        user_course = db.session.query(UserCourse).filter(UserCourse.user_id==user_id, UserCourse.course_id==course_id).first()
+        if user_course:
+            user_course.certificate_issued = True
+            db.session.commit()
+            return user_course
+        else:
+            # Optionally handle the case where no user_course record exists
+            return None
+
     def update_db(self, data):
         try:
             for key, value in data.items():

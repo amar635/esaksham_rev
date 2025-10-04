@@ -16,23 +16,6 @@ except ImportError:
     access_logger = logging.getLogger('access')
     error_logger = logging.getLogger('error')
 
-# class User(UserMixin, db.Model):
-#     __tablename__ = "users"
-    
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(128))
-#     email = db.Column(db.String(128), unique=True)
-#     password = db.Column(db.String(128))
-#     is_active = db.Column(db.Boolean, default=True)
-#     is_admin = db.Column(db.Boolean, default=False)
-#     registered_on = db.Column(db.DateTime, default=lambda: datetime.now(tz=ZoneInfo('Asia/Kolkata')))
-#     uuid = db.Column(db.String(36), unique=True, index=True, default=lambda: str(uuid.uuid4()))
-
-#     # Relationships
-#     user_roles = db.relationship('UserInRole', back_populates='user', cascade="all, delete-orphan")
-
-
-
 class User(UserMixin, db.Model):
     def get_uuid():
         return str(uuid.uuid4())
@@ -47,15 +30,14 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     registered_on = db.Column(db.DateTime, default=lambda: datetime.now(tz=ZoneInfo('Asia/Kolkata')))
     uuid = db.Column(db.String(36), unique=True, index=True, default=get_uuid)
-    activity_log = db.relationship('ActivityLog', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     password_reset_expiry = db.Column(DateTime(timezone=True), nullable=True)
     reset_token = db.Column(db.String(), nullable=True, unique=True, index=True)
     totp_secret = db.Column(db.String(64), nullable=True, unique=True, index=True)
 
     # added on 20 Aug 2025 to cater for block/district/state
-    state_id = db.Column(db.ForeignKey('states.id'), nullable=False)
-    district_id = db.Column(db.ForeignKey('districts.id'), nullable=False)
-    block_id = db.Column(db.ForeignKey('blocks.id'), nullable=False)
+    state_id = db.Column(db.ForeignKey('states.id'), nullable=True)
+    district_id = db.Column(db.ForeignKey('districts.id'), nullable=True)
+    block_id = db.Column(db.ForeignKey('blocks.id'), nullable=True)
 
     #added on 29 Aug 2025
     supervisor_id = db.Column(db.Integer, default=0)

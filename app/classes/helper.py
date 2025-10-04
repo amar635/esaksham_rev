@@ -4,10 +4,10 @@ import logging
 import os
 import random
 
-from flask import current_app, json, session, url_for
+from flask import current_app, json, session
 import urllib
 from app.db import db
-from app.models import State_UT, District, Block, ActivityLog, User
+from app.models import State_UT, District, Block, User
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5

@@ -8,6 +8,9 @@ from app.classes.helper import convert_to_seven_digits, generate_rsa_key_pair, g
 from app.db import db
 from app.models import State_UT,District,Block,User
 
+
+login_manager=LoginManager()
+
 def create_app():
     load_dotenv()
     app = Flask(__name__)
@@ -38,7 +41,7 @@ def create_app():
     db.init_app(app)
     migrate = Migrate(app, db)
     csrf = CSRFProtect(app)
-    login_manager=LoginManager(app)
+    login_manager.init_app(app)
     # create_db(app)
 
     @login_manager.user_loader

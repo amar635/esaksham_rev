@@ -1,7 +1,6 @@
 from app.models.state_ut import State_UT
 from app.models.district import District
 from app.models.block import Block
-from app.models.activity_log import ActivityLog
 from app.models.user import User
 from app.models.courses import Course
 from app.models.user_courses import UserCourse

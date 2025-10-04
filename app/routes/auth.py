@@ -6,6 +6,8 @@ from app.classes.helper import decrypt_password, generate_math_captcha
 from app.models import User
 from passlib.hash import pbkdf2_sha256
 
+from app.models.user_in_role import UserInRole
+
 
 blp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -31,7 +33,7 @@ def login():
         user = User.get_user_by_email(email)
 
         if user and pbkdf2_sha256.verify(password, user.password):
-            login_user(user, remember=form.remember_me.data)
+            login_user(user)
             session.pop('captcha_answer', None)  # clear captcha on success
 
             # Flask-Login handles secure cookie sessions automatically
@@ -60,7 +62,11 @@ def register():
                         state_id=state_id, 
                         district_id=None if district_id == -1 else district_id,
                         block_id=None if block_id == -1 else block_id)
-            # user.save()
+            user.save()
+            # give normal user role 
+            users_in_roles = UserInRole(user.id)
+            users_in_roles.save()
+
             flash(message=f"Registered Successfully. Please login with your crendentials", category="success")
             return redirect(url_for('auth.login'))
         except Exception as ex:
@@ -75,7 +81,7 @@ def register():
 def change_password():
     import re
         
-    uuid = current_user.id
+    uuid = current_user.uuid
     form = ChangePasswordForm()
 
     if request.method == "POST":

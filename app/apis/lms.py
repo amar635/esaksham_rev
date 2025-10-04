@@ -5,6 +5,7 @@ from flask_login import current_user
 
 from app.db import db
 from app.models import ScormData
+from app.models.user_courses import UserCourse
 
 
 blp = Blueprint('api_lms',__name__, url_prefix='/api/lms')
@@ -36,17 +37,13 @@ def scorm_get_value(course_id):
         data = request.get_json()
         cmi_key = data.get('element', '')
         user_id = current_user.id
-        print(cmi_key)
         result = ScormData.get_by_key(user_id, course_id, cmi_key)
         if result: 
-            print(result.cmi_value)
             return jsonify({'result': result.cmi_value, 'errorCode': '0'})
         else:
-            print('passed')
             return jsonify({'result': '', 'errorCode': '101'})
 
     except Exception as e:
-        print("Error in scorm_get_value:", str(e))
         return jsonify({'result': '', 'errorCode': '101'})
 
 @blp.route('/scorm/<int:course_id>/set_value', methods=['POST'])
@@ -54,8 +51,6 @@ def scorm_set_value(course_id):
     """Set SCORM data value"""
     try:
         data = request.get_json()
-        print("set_value:")
-        print(data)
         cmi_key = data.get('element', '')
         cmi_value = data.get('value', '')
         user_id = current_user.id
@@ -66,7 +61,7 @@ def scorm_set_value(course_id):
         # Validate required elements
         if not cmi_key:
             return jsonify({'result': 'false', 'errorCode': '201'})  # Invalid argument
-        
+    
         # Save or update data
         scorm_data = ScormData.get_by_key(user_id, course_id, cmi_key)
         if scorm_data:
@@ -81,6 +76,12 @@ def scorm_set_value(course_id):
                 cmi_value=cmi_value
             )
             scorm_data.save()
+        if cmi_key == 'cmi.core.lesson_status':
+            if cmi_value == 'passed':
+                # update certification in user_course to true
+                if not UserCourse.update(user_id=user_id, course_id=course_id):
+                    db.session.rollback()
+                    return jsonify({'result': 'false', 'errorCode': '101'})
         return jsonify({'result': 'true', 'errorCode': '0'})
         
     except Exception as e:

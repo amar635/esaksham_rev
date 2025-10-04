@@ -1,9 +1,12 @@
 import base64
+import csv
+from datetime import datetime
+from io import StringIO
 import os
 import shutil
 from typing import OrderedDict
 import uuid
-from flask import Blueprint, current_app, flash, json, jsonify, redirect, render_template, request, send_from_directory, session, url_for
+from flask import Blueprint, Response, current_app, flash, json, jsonify, redirect, render_template, request, send_from_directory, session, url_for
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename 
 from app.db import db
@@ -84,6 +87,59 @@ def feedback():
 
     captcha_question = generate_math_captcha()
     return render_template('other/feedback.html', form = form, captcha_question = captcha_question)
+
+@blp.route("/feedback/view")
+def view_feedback():
+    feedbacks = [] 
+    for feedback in Feedback.query.order_by(Feedback.created_at.desc()).all():
+        feedbacks.append({
+            'id': feedback.id,
+            'name':feedback.name,
+            'email':feedback.email,
+            'subject':feedback.subject,
+            'category':feedback.message_category,
+            'message':feedback.message,
+            'rating':feedback.rating,
+            'created_at':feedback.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        })
+    return render_template('other/view_feedback.html', feedbacks = feedbacks)
+
+@blp.route('/export-feedback')
+@login_required
+def export_feedback():
+    try:
+        csv_data = StringIO()
+        csv_writer = csv.writer(csv_data)
+        csv_writer.writerow([
+            'ID', 'Name', 'Email', 'Subject', 'Category', 'Message', 'Rating',
+            'Has Image', 'Date Created'
+        ])
+        feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
+        for feedback in feedbacks:
+            csv_writer.writerow([
+                feedback.id,
+                feedback.name,
+                feedback.email,
+                feedback.subject,
+                feedback.message_category,
+                feedback.message,
+                feedback.rating,
+                'Yes' if feedback.image_filename else 'No',
+                feedback.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        # activity_logger.info(f"Exported feedback data ({len(feedbacks)} entries)")
+        response = Response(
+            csv_data.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename=feedback_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+            }
+        )
+        return response
+    except Exception as e:
+        # error_logger.error(f"Error exporting feedback: {e}")
+        flash(f'Error exporting feedback')
+        return redirect(url_for('admin.view_feedback'))
 
 @blp.route('/faq')
 def faq():
@@ -181,7 +237,8 @@ def render_pdf(filename):
     
     return send_from_directory(abs_package_path, filename)
 
-# LMS related 
+########## LMS related #######
+
 @blp.route("/upload", methods=['GET','POST'])
 @login_required
 def upload():
@@ -292,4 +349,9 @@ def serve_scorm_content(course_id, filename):
     return send_from_directory(abs_package_path, filename)
 
 
-
+########## FILTERS ########
+@blp.app_template_filter('nl2br')
+def nl2br(value):
+    if not value:
+        return ''
+    return value.replace('\n', '<br>')
